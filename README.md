@@ -1,20 +1,20 @@
 ### High-level design
 
 **Agents**
-- ResearchAgent — gathers web content using a Web Search tool or optional SerpAPI; stores raw snippets + metadata.
+- **ResearchAgent** — gathers web content using a Web Search tool or optional SerpAPI; stores raw snippets + metadata.
 
-- AnalysisAgent — ingests research results, de-duplicates, ranks by relevance, extracts outlines, and produces a structured brief.
+- **AnalysisAgent** — ingests research results, de-duplicates, ranks by relevance, extracts outlines, and produces a structured brief.
 
-- ReportWriterAgent — takes the structured brief and produces a formatted report (Markdown/HTML) and exports to PDF or DOCX using a Document Generator Tool.
+- **ReportWriterAgent** — takes the structured brief and produces a formatted report (Markdown/HTML) and exports to PDF or DOCX using a Document Generator Tool.
 
 
 **Tools**
 
-- WebSearchTool — wrapper around SerpAPI / Bing / Google Custom Search. Optional. If not configured, a demo mock search returns a curated sample set (useful for local dev).
+- **WebSearchTool** — wrapper around SerpAPI / Bing / Google Custom Search. Optional. If not configured, a demo mock search returns a curated sample set (useful for local dev).
 
-- SummarizationTool — small helper using Google GenAI to summarize long text chunks.
+- **SummarizationTool** — small helper using Google GenAI to summarize long text chunks.
 
-- DocumentGeneratorTool — uses Python libraries (python-docx, weasyprint or reportlab) to generate DOCX and PDF.
+- **DocumentGeneratorTool** — uses Python libraries (python-docx, weasyprint or reportlab) to generate DOCX and PDF.
 
 
 **Orchestration**
@@ -23,7 +23,7 @@
 
 **Interface**
 
-- Gradio UI: a simple web form to submit topic, options (depth, number of sources), and buttons to run the pipeline and download results.
+- **Gradio UI**: a simple web form to submit topic, options (depth, number of sources), and buttons to run the pipeline and download results.
 
 **LLM**
 
