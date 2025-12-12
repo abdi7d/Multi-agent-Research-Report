@@ -50,7 +50,7 @@ Use google-genai Python SDK (Gemini/GenAI). Provide code using the official clie
 
 
 
-
+```
 
 multiagent-research-report/
 ├── README.md
@@ -84,6 +84,7 @@ multiagent-research-report/
     ├── test_agents.py
     └── test_tools.py
 
+```
 
 
 
@@ -95,8 +96,7 @@ multiagent-research-report/
 
 
 
-
-
+```
 
 multiagent-research-report/
 ├─ README.md
@@ -121,7 +121,7 @@ multiagent-research-report/
 │     └─ llm_client.py        # thin wrapper around Google GenAI client
 └─ examples/
    └─ sample_report.pdf
-
+```
 
 
 Climate change impacts on Ethiopian Agriculture
