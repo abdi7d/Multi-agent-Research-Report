@@ -4,7 +4,8 @@ import google.generativeai as palm
 from src.tools.summarizer import extract_key_points
 
 # Set API key globally
-palm.configure(api_key="YOUR_GOOGLE_API_KEY")
+# palm.configure(api_key="YOUR_GOOGLE_API_KEY")
+palm.configure(api_key="AIzaSyAeIw9ace-n7-Hb1DQHSy62sv69002CzIk")
 
 def analyze_research(research_output: dict) -> dict:
     """

@@ -3,7 +3,8 @@ import json
 import google.generativeai as palm
 
 # Set your Google API key
-palm.configure(api_key="YOUR_GOOGLE_API_KEY")
+# palm.configure(api_key="YOUR_GOOGLE_API_KEY")
+palm.configure(api_key="AIzaSyAeIw9ace-n7-Hb1DQHSy62sv69002CzIk")
 
 def research_topic(topic: str, max_results: int = 5) -> dict:
     """
