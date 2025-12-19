@@ -1,54 +1,79 @@
-# src/agents/analysis_agent.py
-import json
-import google.generativeai as palm
-from src.tools.summarizer import extract_key_points
+"""Analysis agent: synthesize research hits into a structured report.
 
-# Set API key globally
-# palm.configure(api_key="YOUR_GOOGLE_API_KEY")
-palm.configure(api_key="AIzaSyAeIw9ace-n7-Hb1DQHSy62sv69002CzIk")
+Uses the summarizer and LLM wrapper to produce a JSON report structure. Falls back to
+an internal heuristic if a robust LLM isn't available.
+"""
+import json
+from typing import Dict, List
+
+from src.tools.summarizer import extract_key_points
+from src.utils.llm_client import get_default_client
+
 
 def analyze_research(research_output: dict) -> dict:
-    """
-    Convert research output into a structured report using Google PaLM API.
-    """
-    excerpts = research_output.get("excerpts", [])
-    key_points = extract_key_points(excerpts)
+    excerpts: List[str] = research_output.get("excerpts", [])
     title = research_output.get("query", "Research Report")
     summary = research_output.get("summary", "")
 
+    # First get concise bullets
+    try:
+        key_points_text = extract_key_points(excerpts)
+    except Exception:
+        key_points_text = "\n".join([f"- {e}" for e in excerpts[:8]])
+
+    # Prompt an LLM to convert bullets into structured JSON
     prompt = (
-        f"You are an expert researcher. Topic: {title}\n"
-        f"Summary: {summary}\n"
-        f"Bullets:\n{key_points}\n\n"
-        "Task: Create structured report JSON with keys: title, summary, sections.\n"
-        "Sections should be a list of objects with keys: heading, content (list of strings).\n"
-        "Return only a valid JSON object."
+        f"{title}\n"
+        f"Summary: {summary}\n\n"
+        f"Bulleted points:\n{key_points_text}\n\n"
+        "Task: Create a structured report JSON object with keys: 'title', 'summary', 'sections'. "
+        "The 'sections' key should be a list of objects, each having 'heading' and 'content' keys. "
+        "Content can be a string or a list of strings. "
+        "IMPORTANT: Return ONLY valid JSON. Do not include markdown formatting (like ```json ... ```) or any other text."
     )
 
+    llm = get_default_client()
     try:
-        # Call Google PaLM text model
-        response = palm.chat(
-            model="chat-bison-001",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.0,
-            max_output_tokens=1000
-        )
+        content = llm.generate_text(prompt, temperature=0.0, max_tokens=1000)
+        # Attempt to clean potential markdown fences if the LLM ignores instructions
+        clean_content = content.replace("```json", "").replace("```", "").strip()
+        
+        parsed = None
+        try:
+            parsed = json.loads(clean_content)
+        except json.JSONDecodeError:
+            # Try to find a JSON substring if direct parse fails
+            start = content.find("{")
+            end = content.rfind("}")
+            if start != -1 and end != -1:
+                try:
+                    parsed = json.loads(content[start:end+1])
+                except Exception:
+                    parsed = None
 
-        # Extract the last message content
-        content = response.last.message.content
+        if isinstance(parsed, dict):
+            # Validate basic structure
+            if "sections" not in parsed:
+                parsed["sections"] = [{"heading": "Key Points", "content": key_points_text}]
+            return parsed
 
-        # Parse JSON safely
-        structured = json.loads(content)
-        return structured
+    except Exception:
+        parsed = None
 
-    except Exception as e:
-        # Fallback if Google API fails
-        return {
-            "title": title,
-            "summary": summary,
-            "sections": [{"heading": "Key Points", "content": key_points}],
-            "error": str(e)
-        }
+    # Final fallback: construct a simple structured report
+    sections = []
+    if key_points_text:
+        sections.append({"heading": "Key Points", "content": key_points_text})
+    else:
+        sections.append(
+            {"heading": "Findings", "content": "No key points extracted."})
+
+    return {
+        "title": title,
+        "summary": summary or (excerpts[0] if excerpts else ""),
+        "sections": sections,
+    }
+
 
 # -------------------------
 # Debug test

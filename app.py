@@ -1,61 +1,50 @@
-# # app.py
-# import gradio as gr
-# from src.orchestrator.langgraph_workflow import run_workflow
-# import threading
-# import time
-# import os
-
-# def run_task(topic, max_results):
-#     # Blocking call that runs the LangGraph workflow and returns final paths
-#     try:
-#         return run_workflow(topic, int(max_results))
-#     except Exception as e:
-#         return {"error": str(e)}
-
-# def submit_topic(topic, max_results=5):
-#     # Kick off the workflow (run synchronously for now) and return results
-#     res = run_task(topic, max_results)
-#     return res
-
-# with gr.Blocks() as demo:
-#     gr.Markdown("# Multi-Agent Research & Report Generator")
-#     with gr.Row():
-#         topic_input = gr.Textbox(label="Research Topic", placeholder="E.g., 'Climate change impacts on Ethiopian agriculture'")
-#         max_results = gr.Number(value=5, label="Maximum search results")
-#     run_btn = gr.Button("Run Research Workflow")
-#     output = gr.JSON(label="Result (paths / messages)")
-
-#     run_btn.click(fn=submit_topic, inputs=[topic_input, max_results], outputs=output)
-
-# demo.launch()
-
-
-
-
-
-
-
-
-
-
+# app.py
 import gradio as gr
 from src.orchestrator.langgraph_workflow import run_workflow
 from pathlib import Path
 
+
 def generate_report(topic: str):
-    paths = run_workflow(topic)
-    if "error" in paths:
-        return paths["error"], None, None
-    return f"Report generated!", Path(paths["docx"]), Path(paths["pdf"])
+    if not topic or not topic.strip():
+        return "Error: please provide a research topic.", None, None
+    paths = run_workflow(topic.strip())
+    if isinstance(paths, dict) and "error" in paths:
+        return f"Error occurred: {paths['error']}", None, None
+    # Expect dict with 'docx' and 'pdf'
+    try:
+        docx_path = paths.get("docx")
+        pdf_path = paths.get("pdf")
+        
+        # Verify files exist
+        if docx_path and not Path(docx_path).exists():
+            return "Error: DOCX file was not created.", None, None
+            
+        return "Report generated successfully!", str(docx_path) if docx_path else None, str(pdf_path) if pdf_path else None
+    except Exception as e:
+        return f"Error parsing output: {e}", None, None
 
-with gr.Blocks() as demo:
-    gr.Markdown("# Multi-Agent Research Report Generator")
-    topic_input = gr.Textbox(label="Enter Research Topic")
-    status = gr.Textbox(label="Status")
-    docx_file = gr.File(label="Download DOCX")
-    pdf_file = gr.File(label="Download PDF")
-    generate_btn = gr.Button("Generate Report")
 
-    generate_btn.click(generate_report, inputs=topic_input, outputs=[status, docx_file, pdf_file])
+if __name__ == "__main__":
+    with gr.Blocks(title="Research Agent") as demo:
+        gr.Markdown("# Multi-Agent Research Report Generator")
+        gr.Markdown("Enter a topic below to let the AI agents research, analyze, and write a report for you.")
+        
+        with gr.Row():
+            topic_input = gr.Textbox(label="Enter Research Topic",
+                                    value="Climate change impacts on Ethiopian Agriculture",
+                                    placeholder="e.g. AI in Healthcare")
+        
+        generate_btn = gr.Button("Generate Report", variant="primary")
+        status = gr.Textbox(label="Status", interactive=False)
+        
+        with gr.Row():
+            docx_file = gr.File(label="Download DOCX")
+            pdf_file = gr.File(label="Download PDF")
 
-demo.launch()
+        generate_btn.click(generate_report, inputs=topic_input,
+                        outputs=[status, docx_file, pdf_file])
+
+    try:
+        demo.launch(server_name="127.0.0.1", server_port=7860, show_error=True)
+    except Exception as e:
+        print(f"Failed to launch Gradio app: {e}")

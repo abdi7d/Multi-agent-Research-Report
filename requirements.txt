@@ -1,11 +1,11 @@
 gradio>=4.10
 langgraph>=0.1.0
-google-genai>=0.1.0          # google-genai / python-genai client (install line may be google-genai or google-genai; see official doc)
+google-genai>=0.1.0
 python-dotenv
 requests
 python-docx
 reportlab
-serpapi                      # optional (if you use SerpAPI)
+serpapi
 beautifulsoup4
 lxml
 tqdm
