@@ -1,6 +1,6 @@
 # Multi‑Agent Automated Research & Report Generation
 
-<img src="multiagent_research_report.png" alt="Multi‑Agent Automated Research & Report Generation" width="200" height="200" />
+<img src="multiagent_research_report.png" alt="Multi‑Agent Automated Research & Report Generation" width="1536" height="1024" />
 
 
 ### Overview
