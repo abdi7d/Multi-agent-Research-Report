@@ -1,5 +1,8 @@
 # Multi‑Agent Automated Research & Report Generation
 
+<img src="multiagent_research_report.png" alt="Multi‑Agent Automated Research & Report Generation" width="200" height="200" />
+
+
 ### Overview
 
 This repository implements a **multi‑agent system** for **automated research and report generation** using modern LLM tooling and structured orchestration. The system accepts a research topic from the user, autonomously gathers information from the web, analyzes and synthesizes findings, and produces a **fully formatted research report** (PDF or DOCX).
