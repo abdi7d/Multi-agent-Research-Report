@@ -207,7 +207,7 @@ The Gradio interface will launch in your browser.
 
 ### License
 
-MIT License
+[MIT License](https://github.com/abdi7d/Multi-agent-Research-Report/blob/main/LICENSE)
 
 ---
 
